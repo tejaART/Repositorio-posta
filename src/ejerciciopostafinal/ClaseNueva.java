@@ -11,4 +11,8 @@ package ejerciciopostafinal;
  */
 public class ClaseNueva {
     
+    public int getAzucar(){
+      
+        return 5 ;
+    }
 }

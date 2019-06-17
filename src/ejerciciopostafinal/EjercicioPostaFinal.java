@@ -16,6 +16,9 @@ public class EjercicioPostaFinal {
      */
     public static void main(String[] args) {
         System.out.println("amarillo");
+        
+        ClaseNueva cosa = new ClaseNueva();
+        System.out.println(cosa.getAzucar()); 
     }
     
 }
