@@ -10,5 +10,8 @@ package ejerciciopostafinal;
  * @author TejaART
  */
 public class ClaseNueva {
+	public String getCafe(){
+		return "cafe";
+	}
     
 }
