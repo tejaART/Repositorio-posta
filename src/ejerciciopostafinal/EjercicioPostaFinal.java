@@ -15,10 +15,7 @@ public class EjercicioPostaFinal {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        System.out.println("amarillo");
-        
-        ClaseNueva cosa = new ClaseNueva();
-        System.out.println(cosa.getAzucar()); 
+        ConexionBaseDeDatos.Consulta("insert into TablaQueNoTieneQueVerConNada values(1615,'vamo lo pibe') ");
     }
     
 }
