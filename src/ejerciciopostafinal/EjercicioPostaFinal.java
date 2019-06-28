@@ -5,6 +5,11 @@
  */
 package ejerciciopostafinal;
 
+import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
 /**
  *
  * @author TejaART
@@ -14,8 +19,17 @@ public class EjercicioPostaFinal {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
-        ConexionBaseDeDatos.Consulta("insert into TablaQueNoTieneQueVerConNada values(1615,'vamo lo pibe') ");
+    public static void main(String[] args) throws SQLException, IOException {
+       
+        LectorArchivo lector = new LectorArchivo();
+        
+        ConexionBaseDeDatos.hacemeInsertDePagos(lector.leemeElArchivo("C:/Users/MaxiPC/Desktop/proyecto lalala/cafeconlechefile.txt"));
+      
+        
+       
+        
+         
+       
     }
     
 }
