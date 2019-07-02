@@ -58,24 +58,21 @@ public class ConexionBaseDeDatos {
         return null;
 
     }
-    
-    public static void  ConsultaInsertOUpdate(String consulta) {
+
+    public static void ConsultaInsertOUpdate(String consulta) {
         Connection con = getConexion();
         Statement declara;
         try {
             declara = con.createStatement();
 
             declara.execute(consulta);
-           
+
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error" + e.getMessage(),
                     "Error de Conexion", JOptionPane.ERROR_MESSAGE);
         }
-        
 
     }
-
-    
 
     public static void hacemeUnSelectAtablaUsuario() throws SQLException {
         ResultSet resultado = ConexionBaseDeDatos.Consulta("select * from Usuario");
@@ -87,12 +84,13 @@ public class ConexionBaseDeDatos {
         }
     }
 
-    public static void hacemeInsertDePagos(ArrayList<Pago> arrayLoca) throws IOException, SQLException {
-
-        
-
+    public static String hacemeInsertDePagos(ArrayList<Pago> arrayLoca) throws IOException, SQLException {
+        int pagosInsertados = 0;
+        int pagosExistentes = 0;
+        int pagosSinUsuario = 0;
+        int pagosTotales = 0;
         for (int i = 0; i < arrayLoca.size(); i++) {
-             
+            pagosTotales++;
             String pay_instrument = "'" + arrayLoca.get(i).getPay_instrument() + "'";
             String barcode = "'" + arrayLoca.get(i).getBarcode() + "'";
             String terminal_seq_number = "'" + arrayLoca.get(i).getTerm_Seq_Number() + "'";
@@ -101,27 +99,37 @@ public class ConexionBaseDeDatos {
             String payment_date = "'" + arrayLoca.get(i).getPayment_date() + "'";
             String transaction_code = "'" + arrayLoca.get(i).getTransaction_code() + "'";
             int amount = arrayLoca.get(i).getAmount();
-            System.out.println("buscando usuario con codigo de credencial "+barcode );
+            System.out.println("buscando usuario con codigo de credencial " + barcode);
             ResultSet resultado = ConexionBaseDeDatos.Consulta("select id_Us from Usuario where cod_Cred = " + barcode + ";");
-            
-            if (resultado.next()) {
-               ResultSet pagosUnivocos = ConexionBaseDeDatos.Consulta("select dia_pago,terminal,num_sec_term from Pago where cod_bar = "+barcode+";");
-                if(!pagosUnivocos.next()){
-                ConexionBaseDeDatos.ConsultaInsertOUpdate("insert into Pago(cod_trans,dia_pago,cod_moneda,monto,terminal,num_sec_term,cod_bar,inst_pago,ID_Usuario) values(" + transaction_code + "," + payment_date + "," + Currency_code + "," + amount + "," + terminal + "," + terminal_seq_number + "," + barcode + "," + pay_instrument + "," + resultado.getString(1) + ");");
-                
-                ResultSet idDePago = ConexionBaseDeDatos.Consulta("select id_pago from Pago where cod_bar = "+barcode+";");
-                idDePago.next();
-                System.out.println( "El pago "+idDePago.getString(1)+" ha sido vinculado con exito al usuario "+resultado.getString(1));
-                }else{
-                    System.out.println("Pago con terminal "+pagosUnivocos.getString(2)+", y numero de secuencia "+pagosUnivocos.getString(3)+" ya existente");
-                }
-                
 
-            }else{
+            if (resultado.next()) {
+                ResultSet pagosUnivocos = ConexionBaseDeDatos.Consulta("select * from Pago where dia_pago = " + payment_date + " and terminal = " + terminal + " and num_sec_term = " + terminal_seq_number + "  and cod_bar="+barcode+";");
+                if (!pagosUnivocos.next()) {
+
+                    ConexionBaseDeDatos.ConsultaInsertOUpdate("insert into Pago(cod_trans,dia_pago,cod_moneda,monto,terminal,num_sec_term,cod_bar,inst_pago,ID_Usuario) values(" + transaction_code + "," + payment_date + "," + Currency_code + "," + amount + "," + terminal + "," + terminal_seq_number + "," + barcode + "," + pay_instrument + "," + resultado.getString(1) + ");");
+
+                    ResultSet idDePago = ConexionBaseDeDatos.Consulta("select  id_pago from Pago where cod_bar = " + barcode + " order by  id_pago desc;");
+                    idDePago.next();
+                    System.out.println("El pago " + idDePago.getString(1) + " ha sido vinculado con exito al usuario " + resultado.getString(1));
+                    pagosInsertados++;
+                } else {
+                    System.out.println("Pago con terminal " + pagosUnivocos.getString(6) + ", y numero de secuencia " + pagosUnivocos.getString(7) + " ya existente");
+                    pagosExistentes++;
+                }
+
+            } else {
                 System.out.println("No se encontro un usuario con ese codigo de credencial, no se inserta el pago");
+                pagosSinUsuario++;
             }
+
         }
+
+        return " Registros totales : " + pagosTotales + "\n"
+                + "\n -Pagos procesados : " + pagosInsertados
+                + "\n --Pagos insertados con exito : " + pagosInsertados + "\n"
+                + "\n -Pagos no Procesados : " + (pagosExistentes + pagosSinUsuario)
+                + "\n --Pagos con usuario inexistente : " + pagosSinUsuario
+                + "\n --Pagos ya existentes : " + pagosExistentes;
     }
-    
 
 }
